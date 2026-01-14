@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Морской бой</title>
+
+<style>
+body {
+    font-family: Arial;
+    margin: 20px;
+    user-select: none;
+}
+
+.info div {
+    font-size: 18px;
+    line-height: 1.4em;
+}
+ 
+.done {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: 40px repeat(10, 50px);
+    grid-template-rows: 40px repeat(10, 50px);
+}
+
+.top,.side {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    color:#7d28ff;
+}
+
+.cell {
+    width:50px;
+    height:50px;
+    border:1px solid #c28cff;
+    cursor:pointer;
+    position: relative;
+}
+
+.ship1 { background: yellow; }
+.ship2 { background: green; }
+.ship3 { background: blue; }
+.ship4 { background: purple; }
+
+.hit {
+    background: red !important;
+}
+
+.miss::after {
+    content:"•";
+    color:red;
+    font-size:40px;
+    position:absolute;
+    left:17px;
+    top:0;
+}
+
+.tools button {
+    padding:7px 15px;
+    font-size:16px;
+    margin-right:6px;
+}
+.tools .active {
+    background:#d5b6ff;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Морской бой!</h2>
+
+<div class="info">
+    <div id="i4" style="color:purple">Корабль с 4 клетками – 1</div>
+    <div id="i3" style="color:green">Корабль с 3 клетками – 1</div>
+    <div id="i2" style="color:blue">Корабль с 2 клетками – 1</div>
+    <div id="i1" style="color:yellow">Корабль с 1 клеткой – 1</div>
+</div>
+
+<div class="tools">
+    <button data-type="ship4">4-палубный</button>
+    <button data-type="ship3">3-палубный</button>
+    <button data-type="ship2">2-палубный</button>
+    <button data-type="ship1">1-палубный</button>
+    <button data-type="none" class="active">Очистка</button>
+</div>
+
+<br>
+<button onclick="startGame()">▶ Начать игру</button>
+
+<div class="board" id="board"></div>
+
+<script>
+const board = document.getElementById("board");
+const letters = "ABCDEFGHIJ";
+let mode = "none";
+let game = false; // РЕЖИМ ИГРЫ
+
+const need = { ship4:4, ship3:3, ship2:2, ship1:1 };
+const info = {
+    ship4: document.getElementById("i4"),
+    ship3: document.getElementById("i3"),
+    ship2: document.getElementById("i2"),
+    ship1: document.getElementById("i1")
+};
+
+document.querySelectorAll(".tools button").forEach(btn=>{
+    btn.onclick=()=>{
+        document.querySelectorAll(".tools button").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        mode=btn.dataset.type;
+    }
+});
+
+board.appendChild(document.createElement("div"));
+for(let i=1;i<=10;i++){
+    let d=document.createElement("div");
+    d.className="top";
+    d.textContent=i;
+    board.appendChild(d);
+}
+
+for(let r=0;r<10;r++){
+    let s=document.createElement("div");
+    s.className="side";
+    s.textContent=letters[r];   
+    board.appendChild(s);
+
+    for(let c=0;c<10;c++){
+        let cell=document.createElement("div");
+        cell.className="cell";
+        cell.onclick=()=>apply(cell);
+        board.appendChild(cell);
+    }
+}
+
+function startGame(){
+    game = true;
+    alert("Игра началась! Стреляй 💥");
+}
+
+function apply(cell){
+
+    // РЕЖИМ ВЫСТРЕЛОВ
+    if(game){
+
+        if(cell.classList.contains("hit") || cell.classList.contains("miss")) return;
+
+        if(
+            cell.classList.contains("ship1") ||
+            cell.classList.contains("ship2") ||
+            cell.classList.contains("ship3") ||
+            cell.classList.contains("ship4")
+        ){
+            alert("🔥 Ты ПОПАЛ!");
+            cell.classList.add("hit");
+        } else {
+            alert("❌ Мимо");
+            cell.classList.add("miss");
+        }
+        return;
+    }
+
+    // РАССТАНОВКА КОРАБЛЕЙ
+    cell.className="cell";
+    if(mode!=="none") cell.classList.add(mode);
+    check();
+}
+
+function check(){
+    for(let k in need){
+        let count=document.querySelectorAll("."+k).length;
+        info[k].classList.toggle("done", count===need[k]);
+    }
+}
+</script>
+
+</body>
+</html>
